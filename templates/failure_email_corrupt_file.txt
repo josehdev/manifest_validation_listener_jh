@@ -1,0 +1,8 @@
+Hello {}!
+
+We regret that your submitted manifest did not pass validation{}.
+
+The upload of the manifest resulted in an invalid or corrupt file.
+
+We suggest that you try uploading again or contact
+nemo@som.umaryland.edu for support.

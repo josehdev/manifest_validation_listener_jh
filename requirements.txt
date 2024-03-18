@@ -1,0 +1,9 @@
+jsonschema
+Jinja2
+pandas
+requests==2.31.0
+pika
+azure-identity
+azure-storage-blob
+azure-mgmt-authorization
+msgraph-sdk

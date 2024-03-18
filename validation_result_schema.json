@@ -1,0 +1,86 @@
+{
+    "type" : "object",
+    "properties" : {
+        "complete_errors": {
+            "description": "Whether the errors are the complete list of errors or not.",
+            "type" : "boolean"
+        },
+        "dryrun": {
+            "description": "Indicates whether the submission is a dryrun/test, or not. If the field is missing, the submission is interpreted as a production submission instead of a test.",
+            "type": "boolean"
+        },
+        "errors": {
+            "description": "A list of validation error messages.",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "error_path": {
+            "description": "The path to the blob file containing the complete list of validation errors.",
+            "type": "string"
+        },
+        "manifest_path": {
+            "description": "Blob storage path where the submitted manifest is stored.",
+            "type" : "string"
+        },
+        "project_name": {
+            "description": "Project name where the message was published from.",
+            "type" : "string",
+            "enum": ["nemo", "scorch"]
+        },
+        "original_filename": {
+            "description": "The name of the file that the user originally uploaded via the NeMO website.",
+            "type" : "string"
+        },
+        "program": {
+            "description": "The program that the submitted manifest is associated with.",
+            "type" : "string",
+            "enum": ["allen_brain_map", "bican", "biccn", "scorch", "sspsygene", "other", "unknown"]
+        },
+        "result": {
+            "description": "Whether the validation succeeded.",
+            "type" : "boolean"
+        },
+        "submission_id": {
+            "description": "The submission ID.",
+            "type" : "string",
+            "minLength": 7,
+            "maxLength": 7
+        },
+        "submitter": {
+            "type": "object",
+            "required": ["username", "first", "last", "email"],
+            "properties": {
+                "username": {
+                    "description": "The submitter's NeMO username.",
+                    "type" : "string"
+                },
+                "first": {
+                    "description": "The submitter's first name.",
+                    "type" : "string"
+                },
+                "last": {
+                    "description": "The submitter's last name.",
+                    "type" : "string"
+                },
+                "email": {
+                    "description": "The submitter's email address.",
+                    "format": "email",
+                    "type" : "string"
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "required": [
+        "manifest_path",
+        "project_name",
+        "original_filename",
+        "program",
+        "result",
+        "submission_id",
+        "submitter"
+    ],
+    "additionalProperties": false
+}

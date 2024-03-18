@@ -1,0 +1,63 @@
+[general]
+nemo-root=/path/to/NEMO
+nemo-internal-root-url=NEMO_INTERNAL_BASE_HTTP_URL
+submitted-manifests-root=..\nemo\submitted-manifests
+valid-manifests-root=..\nemo\valid-manifests
+dirname-mappings-filepath=..\nemo\aux-files\vocab_to_dirname_mappings.json
+
+[db]
+host=SERVER
+database=DATABASE
+username=USERNAME
+password=PASSWORD
+
+[email]
+admins=admin1@som.umaryland.edu,admin2@som.umaryland.edu
+sender-email=nemo@som.umaryland.edu
+
+[logger]
+listener-log-level=INFO
+submission-log-level=DEBUG
+log-root-dir=..\nemo\logs
+log-dir=manifest-validation-listener
+log-name=manifest-validation-listener
+# Rotate logs on Sundays. Use TimedRotatingFileHandler values
+rotate-when=W6
+
+[rabbitmq]
+host=porpoise.rmq.cloudamqp.com
+port=5672
+virtual-host=cykdlvsx
+username=cykdlvsx
+password=
+
+# Consumer tries to reconnect if the connection or channel is lost.
+# max-reconnect-attempts is the maximum number of times the listener will try
+# to reconnect to RabbitMQ.
+# reconnect-wait-time is the time the consumer will sleep before trying to
+# Try to reconnect every minute for 24hrs
+max-reconnect-attempts=1440
+reconnect-wait-time=60
+
+# Incoming message queue info
+consumer-exchange-name=exch_1
+consumer-queue-name=manifest_validation_status
+consumer-routing-key=manifest_validation_status
+
+[storage-nemo]
+manifest-container=nemo-manifest-submissions
+error-container=nemo-manifest-submission-errors
+azure-storage-connection-string=
+azure-tenant-id=16e8d66f-f4e9-4f37-82a5-789a43591419
+azure-client-id=19460930-766c-423f-865f-1cb5b7983e0e
+azure-client-secret=
+azure-subscription-id=eb4c8436-a70e-4989-8bc5-a0c5531f28e9
+azure-resource-group=Trial_Resource_Group_1
+azure-storage-account=jhtrialstoracc1
+
+[storage-scorch]
+# uses the same credentials as NeMO GCP project
+credentials=/path/to/credentials.json
+project-id=SCORCH_GCP_PROJECT_ID
+manifest-bucket=scorch-manifest-submissions
+error-bucket=scorch-manifest-submission-errors
