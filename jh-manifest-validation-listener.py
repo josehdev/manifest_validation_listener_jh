@@ -214,10 +214,10 @@ def assign_permissions_to_container(cloud_storage_config, container_name, submit
     graph_service_client = get_graph_service_client(cloud_storage_config)
 
     # Create the scope for the role assignment 
-    subscription = f'subscriptions/{cloud_storage_config['azure-subscription-id']}'
-    res_group = f'resourceGroups/{cloud_storage_config['azure-resource-group']}'
-    storage_acc = f'providers/Microsoft.Storage/storageAccounts/{cloud_storage_config['azure-storage-account']}'
-    container = f'blobServices/default/containers/{container_name}'
+    subscription = f"subscriptions/{cloud_storage_config['azure-subscription-id']}"
+    res_group = f"resourceGroups/{cloud_storage_config['azure-resource-group']}"
+    storage_acc = f"providers/Microsoft.Storage/storageAccounts/{cloud_storage_config['azure-storage-account']}"
+    container = f"blobServices/default/containers/{container_name}"
     scope = f'{subscription}/{res_group}/{storage_acc}/{container}'
 
     # Create the role definition string 
@@ -414,12 +414,8 @@ def get_blob_service_client(cloud_storage_config):
     """
     Creates and returns a Blob Service client authenticated with Azure.
     """    
-    # TODO: change this credential to client/secret credential
-    credential = DefaultAzureCredential()
-
     blob_service_client = BlobServiceClient.from_connection_string(
-            cloud_storage_config['azure-storage-connection-string'], 
-            credential
+            cloud_storage_config['azure-storage-connection-string'] 
     )
 
     return blob_service_client
