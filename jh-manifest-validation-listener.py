@@ -29,6 +29,7 @@ from azure.identity import DefaultAzureCredential, ClientSecretCredential
 from azure.storage.blob import BlobServiceClient, BlobClient
 from azure.mgmt.authorization import AuthorizationManagementClient
 from azure.mgmt.authorization.models import RoleAssignmentCreateParameters
+from msgraph.generated.users.users_request_builder import UsersRequestBuilder
 from msgraph import GraphServiceClient
 
 storage = {'bucket':'dummy'}
@@ -197,8 +198,9 @@ def create_submission_container(blob_service_client, container_name):
     try:
         blob_service_client.create_container(container_name)
     except Exception as err:
-        sub_logger.exception(f"Error in create container {container_name}: {err}",
+        sub_logger.exception(f'Error in create container {container_name}: {err}', 
                              exc_info=True)
+        raise err
 
 
 def assign_permissions_to_container(cloud_storage_config, container_name, submitter_email):
@@ -228,6 +230,11 @@ def assign_permissions_to_container(cloud_storage_config, container_name, submit
 
     # Get user id of guest user account
     user = asyncio.run(get_azure_user_by_email(graph_service_client, submitter_email))
+    if not user:
+        error_message = f"Error in assign permissions to container {container_name}: Unable to find Azure user with email: '{submitter_email}'."
+        sub_logger.error(error_message)
+        raise Exception(error_message)
+
     principal_id = user.id
 
     # Create the role assignments parameters
@@ -247,8 +254,10 @@ def assign_permissions_to_container(cloud_storage_config, container_name, submit
 
     except Exception as err:
         if 'RoleAssignmentExists' in err.message:
-            sub_logger.warning("Role Assignment already exists. Ignore.")
+            sub_logger.warning(f"Role Assignment already exists. Container: {container_name}, User: {submitter_email}. Ignore.")
         else: 
+            sub_logger.exception(f"Error in assign permissions to container {container_name}: {err}",
+                        exc_info=True)
             raise err
 
 
@@ -435,15 +444,28 @@ async def get_azure_user_by_email(graph_service_client: GraphServiceClient, emai
     """
     Finds and returns an Azure user object, by its email address.
     """    
-    email = email.lower()
-    users = await graph_service_client.users.get()
-    user = next((u for u in users.value if u.mail and u.mail.lower() == email), None)
-    next_link = users.odata_next_link
+    # Builds a query filter by mail property.
+    # The equal (eq) comparison is non case-sensitive
+    query_params = UsersRequestBuilder.UsersRequestBuilderGetQueryParameters(
+            filter = f"mail eq '{email}'",
+            count = True,
+    )
 
-    while not user and next_link:
-        users = await graph_service_client.users.with_url(next_link).get()
-        user = next((u for u in users.value if u.mail and u.mail.lower() == email), None)
-        next_link = users.odata_next_link
+    # Builds a request configuration object
+    request_configuration = UsersRequestBuilder.UsersRequestBuilderGetRequestConfiguration(
+            query_parameters = query_params,
+    )
+
+    # Adds required header as per Microsoft documentation
+    request_configuration.headers.add("ConsistencyLevel", "eventual")
+
+    # Runs the users' query 
+    result = await graph_service_client.users.get(request_configuration = request_configuration)
+
+    if len(result.value) == 0:
+        user = None
+    else:
+        user = result.value[0]
 
     return user
 
@@ -1142,7 +1164,8 @@ def send_email(subject, text, html, to_list, cc_list=None, attachment_filepaths=
                                                subtype='tab-separated-values',
                                                filename=filename)
 
-        server = smtplib.SMTP('localhost')
+        #server = smtplib.SMTP('localhost')
+        server = smtplib.SMTP('smtp.freesmtpservers.com')
         #server.set_debuglevel(1)
 
         server.send_message(message)
