@@ -21,12 +21,10 @@ import asyncio
 from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
 from email.message import EmailMessage
-#from google.cloud import storage
 from time import sleep
 from jinja2 import Environment, FileSystemLoader
-from typing import Dict
-from azure.identity import DefaultAzureCredential, ClientSecretCredential
-from azure.storage.blob import BlobServiceClient, BlobClient
+from azure.identity import ClientSecretCredential
+from azure.storage.blob import BlobServiceClient
 from azure.mgmt.authorization import AuthorizationManagementClient
 from azure.mgmt.authorization.models import RoleAssignmentCreateParameters
 from msgraph.generated.users.users_request_builder import UsersRequestBuilder
@@ -1164,8 +1162,7 @@ def send_email(subject, text, html, to_list, cc_list=None, attachment_filepaths=
                                                subtype='tab-separated-values',
                                                filename=filename)
 
-        #server = smtplib.SMTP('localhost')
-        server = smtplib.SMTP('smtp.freesmtpservers.com')
+        server = smtplib.SMTP(config['email']['server'])
         #server.set_debuglevel(1)
 
         server.send_message(message)

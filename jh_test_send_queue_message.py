@@ -1,8 +1,9 @@
+import os
 import json
 import pika
 import traceback
-import datetime  
-
+import sys
+import configparser
 
 payload = {
     'submission_id': 'z8cawiz',
@@ -20,16 +21,14 @@ payload = {
     'dryrun': False
 }
 
-rabbitmq_config = {
-        'publisher_queue_name':'manifest_validation_status',
-        'publisher_routing_key':'manifest_validation_status',
-        'rabbitmq_host':'porpoise.rmq.cloudamqp.com',
-        'rabbitmq_port':'5672',
-        'rabbitmq_virtual_host':'cykdlvsx',
-        'rabbitmq_username':'cykdlvsx',
-        'rabbitmq_password':'CmqxNuE3rxCMckjXbPLiIQe185oyzNhR',
-        'publisher_exchange_name':'exch_1'
-}
+# Read config file
+conf_loc = os.path.join(os.path.dirname(__file__), 'conf.ini')
+
+if not os.path.isfile(conf_loc):
+    sys.exit("Config file could not be found at {}".format(conf_loc))
+
+config = configparser.ConfigParser()
+config.read(conf_loc)
 
 def get_rabbitmq_channel(rabbitmq_connection, exchange_name, queue_name, routing_key):
     """
@@ -61,14 +60,14 @@ def notify_nemo(payload):
     payload_str = json.dumps(payload)
 
     try:
-        rabbitmq_host = rabbitmq_config['rabbitmq_host']
-        rabbitmq_port =  int(rabbitmq_config['rabbitmq_port'])
-        rabbitmq_virtual_host = rabbitmq_config['rabbitmq_virtual_host']
-        rabbitmq_username = rabbitmq_config['rabbitmq_username']
-        rabbitmq_password = rabbitmq_config['rabbitmq_password']
-        publisher_exchange_name = rabbitmq_config['publisher_exchange_name']
-        publisher_queue_name = rabbitmq_config['publisher_queue_name']
-        publisher_routing_key = rabbitmq_config['publisher_routing_key']
+        rabbitmq_host = config['rabbitmq']['host']
+        rabbitmq_port =  int(config['rabbitmq']['port'])
+        rabbitmq_virtual_host = config['rabbitmq']['virtual-host']
+        rabbitmq_username = config['rabbitmq']['username']
+        rabbitmq_password = config['rabbitmq']['password']
+        publisher_exchange_name = config['rabbitmq']['consumer-exchange-name']
+        publisher_queue_name = config['rabbitmq']['consumer-queue-name']
+        publisher_routing_key = config['rabbitmq']['consumer-routing-key']
 
         # RabbitMQ credentials for publisher
         rabbitmq_credentials = pika.PlainCredentials(
